@@ -41,7 +41,10 @@ local function process_input_node(
 	local node_children = {}
 
 	for child_name, child_node in node.children do
-		table.insert(node_children, process_input_node(limb_info_array, limbs_by_name, result, child_name, child_node))
+		table.insert(
+			node_children,
+			process_input_node(limb_info_array, limbs_by_name, result, child_name, child_node)
+		)
 
 		result[child_name] = CFrame.identity
 	end
@@ -68,7 +71,13 @@ local function create_rig(input_rig: InputRootNode): Identity
 	local limbs_by_name: { [string]: LimbInfo } = {}
 	local result_template: { [string]: CFrame } = {}
 
-	local root = process_input_node(limb_info_array, limbs_by_name, result_template, input_rig.root_name, input_rig)
+	local root = process_input_node(
+		limb_info_array,
+		limbs_by_name,
+		result_template,
+		input_rig.root_name,
+		input_rig
+	)
 
 	return {
 		root = root,
