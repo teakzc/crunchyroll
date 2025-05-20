@@ -1,4 +1,6 @@
 --!native
+local Enum = Enum or ((require("@lune/roblox") :: any).Enum) :: typeof(Enum)
+
 local Easing = {
 	[Enum.PoseEasingStyle.Linear] = {
 		[Enum.PoseEasingDirection.In] = function(Value: number): number
