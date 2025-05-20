@@ -1,0 +1,5 @@
+[package]
+name = "ffrostfall/crunchyroll"
+version = "0.0.0-a"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
