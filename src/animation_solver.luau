@@ -52,27 +52,14 @@ local function get_keyframe_after(
 	return closestKeyframe
 end
 
-local function calculate(rig: { [string]: CFrame }, info: create_rig.LimbInfo, origin: CFrame)
-	local result_transform = origin
-		* info.coordinate_frame0
-		* info.transform
-		* info.coordinate_frame1
-
-	rig[info.name] = result_transform
-
-	for _, derived in info.derived do
-		calculate(rig, derived, result_transform)
-	end
-end
-
 local function animation_solver(
 	rig: create_rig.Identity,
 	anim_playbacks: { [animation_asset.Identity]: AnimationPlayback },
 	root: CFrame
 )
-	local limb_info_array = rig.flattened
-	for _, node in limb_info_array do
-		node.priority = -1
+	local limb_array = rig._topologically_sorted_limbs
+	for _, limb in limb_array do
+		limb.priority = -1
 	end
 
 	for animation, playback in anim_playbacks do
@@ -81,7 +68,7 @@ local function animation_solver(
 			get_keyframe_before(animation.keyframes, real_time),
 			get_keyframe_after(animation.keyframes, real_time)
 
-		for _, node in limb_info_array do
+		for _, node in limb_array do
 			if node.priority > playback.priority then
 				continue
 			end
@@ -111,7 +98,13 @@ local function animation_solver(
 		end
 	end
 
-	calculate(rig.result, rig.root, root)
+	rig.result_coordinate_frames["root"] = root
+	for _, limb in rig._topologically_sorted_limbs do
+		rig.result_coordinate_frames[limb.name] = rig.result_coordinate_frames[limb.depends_on]
+			* limb.c0
+			* limb.transform
+			* limb.c1
+	end
 end
 
 return animation_solver

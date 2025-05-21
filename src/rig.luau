@@ -1,90 +1,69 @@
 export type LimbInfo = {
-	coordinate_frame0: CFrame,
-	coordinate_frame1: CFrame,
-
-	-- TEMP
-	priority: number,
-	transform: CFrame,
+	c0: CFrame,
+	c1: CFrame,
 
 	name: string,
-	derived: { LimbInfo },
+
+	children: { LimbInfo }?,
+}
+
+export type Limb = {
+	name: string,
+	c0: CFrame,
+	c1: CFrame,
+	depends_on: string,
+
+	priority: number,
+	transform: CFrame,
 }
 
 export type Identity = {
-	root: LimbInfo,
-	flattened: { LimbInfo },
-	limbs_by_name: { [string]: LimbInfo },
+	_topologically_sorted_limbs: { Limb },
 
-	result: { [string]: CFrame },
+	result_coordinate_frames: { [string]: CFrame },
 }
 
-type InputNode = {
-	coordinate_frame0: CFrame,
-	coordinate_frame1: CFrame,
-
-	children: {
-		[string]: InputNode,
-	},
-}
-
-export type InputRootNode = InputNode & {
-	root_name: string,
-}
-
-local function process_input_node(
-	limb_info_array: { LimbInfo },
-	limbs_by_name: { [string]: LimbInfo },
-	result: { [string]: CFrame },
-	name: string,
-	node: InputNode
-): LimbInfo
-	local node_children = {}
-
-	for child_name, child_node in node.children do
-		table.insert(
-			node_children,
-			process_input_node(limb_info_array, limbs_by_name, result, child_name, child_node)
-		)
-
-		result[child_name] = CFrame.identity
+local function topological_sort(array: { Limb }, node: LimbInfo)
+	if not node.children then
+		return
 	end
 
-	local this_node = {
-		name = name,
+	for _, value in node.children do
+		table.insert(array, {
+			name = value.name,
+			depends_on = node.name,
 
-		coordinate_frame0 = node.coordinate_frame0,
-		coordinate_frame1 = node.coordinate_frame1:Inverse(),
+			c0 = value.c0,
+			c1 = value.c1:Inverse(),
 
-		priority = 0,
-		transform = node.coordinate_frame1,
+			priority = -1,
+			transform = CFrame.identity,
+		})
 
-		derived = node_children,
-	}
-	table.insert(limb_info_array, this_node)
-	limbs_by_name[name] = this_node
-
-	return this_node
+		topological_sort(array, value)
+	end
 end
 
-local function create_rig(input_rig: InputRootNode): Identity
-	local limb_info_array: { LimbInfo } = {}
-	local limbs_by_name: { [string]: LimbInfo } = {}
-	local result_template: { [string]: CFrame } = {}
+local function create_rig(limb: LimbInfo): Identity
+	local limb_arr = {}
 
-	local root = process_input_node(
-		limb_info_array,
-		limbs_by_name,
-		result_template,
-		input_rig.root_name,
-		input_rig
-	)
+	table.insert(limb_arr, {
+		name = limb.name,
+		depends_on = "root",
+
+		c0 = limb.c0,
+		c1 = limb.c1:Inverse(),
+
+		priority = -1,
+		transform = CFrame.identity,
+	})
+
+	topological_sort(limb_arr, limb)
 
 	return {
-		root = root,
-		flattened = limb_info_array,
-		limbs_by_name = limbs_by_name,
+		_topologically_sorted_limbs = limb_arr,
 
-		result = result_template,
+		result_coordinate_frames = {},
 	}
 end
 

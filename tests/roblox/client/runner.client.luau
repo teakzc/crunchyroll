@@ -45,12 +45,12 @@ RunService.RenderStepped:Connect(function(delta_time)
 		},
 	}, character.HumanoidRootPart.CFrame)
 
-	character["Left Arm"].CFrame = rig.result["Left Arm"]
-	character["Right Arm"].CFrame = rig.result["Right Arm"]
+	character["Left Arm"].CFrame = rig.result_coordinate_frames["Left Arm"]
+	character["Right Arm"].CFrame = rig.result_coordinate_frames["Right Arm"]
 
-	character["Left Leg"].CFrame = rig.result["Left Leg"]
-	character["Right Leg"].CFrame = rig.result["Right Leg"]
+	character["Left Leg"].CFrame = rig.result_coordinate_frames["Left Leg"]
+	character["Right Leg"].CFrame = rig.result_coordinate_frames["Right Leg"]
 
-	character["Torso"].CFrame = rig.result["Torso"]
-	character["Head"].CFrame = rig.result["Head"]
+	character["Torso"].CFrame = rig.result_coordinate_frames["Torso"]
+	character["Head"].CFrame = rig.result_coordinate_frames["Head"]
 end)
