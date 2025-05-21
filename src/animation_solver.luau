@@ -12,49 +12,11 @@ export type AnimationPlayback = {
 	priority: number,
 }
 
-local function get_keyframe_before(
-	keyframe_array: { animation_asset.KeyframeNode },
-	real_time: number
-): animation_asset.KeyframeNode?
-	local closest_keyframe: animation_asset.KeyframeNode? = nil
-	local closest_distance: number = math.huge
-
-	for _, keyframe_node in keyframe_array do
-		local distance = keyframe_node.time - real_time
-		local absoluteDistance = math.abs(distance)
-
-		if distance <= 0 and (absoluteDistance < closest_distance) then
-			closest_keyframe = keyframe_node
-			closest_distance = absoluteDistance
-		end
-	end
-
-	return closest_keyframe
-end
-
-local function get_keyframe_after(
-	keyframeArray: { animation_asset.KeyframeNode },
-	real_time: number
-): animation_asset.KeyframeNode?
-	local closestKeyframe: animation_asset.KeyframeNode? = nil
-	local closestDistance: number = math.huge
-
-	for _, keyframe in keyframeArray do
-		local distance = keyframe.time - real_time
-		local absoluteDistance = math.abs(distance)
-
-		if distance >= 0 and (absoluteDistance < closestDistance) then
-			closestKeyframe = keyframe
-			closestDistance = absoluteDistance
-		end
-	end
-
-	return closestKeyframe
-end
-
 local function animation_solver(
 	rig: create_rig.Identity,
-	anim_playbacks: { [animation_asset.Identity]: AnimationPlayback },
+	anim_playbacks: {
+		[animation_asset.Identity]: AnimationPlayback,
+	},
 	root: CFrame
 )
 	local limb_array = rig._topologically_sorted_limbs
@@ -64,9 +26,19 @@ local function animation_solver(
 
 	for animation, playback in anim_playbacks do
 		local real_time = animation.length * playback.alpha
-		local before_keyframe, after_keyframe =
-			get_keyframe_before(animation.keyframes, real_time),
-			get_keyframe_after(animation.keyframes, real_time)
+		local keyframe_after: animation_asset.KeyframeNode?, closest_distance_after: number, keyframe_before: animation_asset.KeyframeNode?, closest_distance_before: number =
+			nil, math.huge, nil, math.huge
+
+		for _, keyframe in animation.keyframes do
+			local distance = keyframe.time - real_time
+			local absolute_distance = math.abs(distance)
+
+			if distance >= 0 and (absolute_distance < closest_distance_after) then
+				keyframe_after, closest_distance_after = keyframe, absolute_distance
+			elseif distance <= 0 and (absolute_distance < closest_distance_before) then
+				keyframe_before, closest_distance_before = keyframe, absolute_distance
+			end
+		end
 
 		for _, node in limb_array do
 			if node.priority > playback.priority then
@@ -74,8 +46,8 @@ local function animation_solver(
 			end
 
 			local left_pose, right_pose =
-				before_keyframe and before_keyframe.poses[node.name],
-				after_keyframe and after_keyframe.poses[node.name]
+				keyframe_before and keyframe_before.poses[node.name],
+				keyframe_after and keyframe_after.poses[node.name]
 
 			if left_pose and right_pose then
 				node.priority = playback.priority
