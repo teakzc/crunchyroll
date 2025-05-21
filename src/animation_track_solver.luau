@@ -13,8 +13,6 @@ export type AnimationTrack = {
 
 	start_fade_time: number,
 	stop_fade_time: number,
-
-	looped: boolean,
 }
 
 local function solve_fade_time(
