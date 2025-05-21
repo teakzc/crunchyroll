@@ -20,11 +20,7 @@ export type KeyframeNode = {
 
 export type Identity = {
 	keyframes: { KeyframeNode },
-	markers: { [string]: number },
-
 	length: number,
-	priority: Enum.AnimationPriority,
-	looping: boolean,
 }
 
 local function recursive_tree_from_pose(
@@ -32,7 +28,7 @@ local function recursive_tree_from_pose(
 	poses: { [string]: PoseNode },
 	root_pose: Pose
 )
-	local sub_poses = (root_pose:GetSubPoses() :: any) :: { Pose }
+	local sub_poses = root_pose:GetSubPoses() :: { Pose }
 
 	for _, sub_pose in sub_poses do
 		recursive_tree_from_pose(keyframe, poses, sub_pose)
@@ -54,12 +50,12 @@ end
 local animation_asset = {}
 
 function animation_asset.load_keyframe_sequence(keyframe_sequence: KeyframeSequence): Identity
-	local keyframes = (keyframe_sequence:GetKeyframes() :: any) :: { Keyframe }
+	local keyframes = keyframe_sequence:GetKeyframes() :: { Keyframe }
 	local keyframe_nodes: { KeyframeNode } = {}
 	local markers = {}
 
 	for keyframe_index, keyframe in keyframes do
-		for _, marker in (keyframe:GetMarkers() :: any) :: { KeyframeMarker } do
+		for _, marker in keyframe:GetMarkers() :: { KeyframeMarker } do
 			markers[marker.Name] = keyframe_index
 		end
 
@@ -84,9 +80,6 @@ function animation_asset.load_keyframe_sequence(keyframe_sequence: KeyframeSeque
 		keyframes = keyframe_nodes,
 
 		length = top.time,
-		priority = keyframe_sequence.Priority,
-		looping = keyframe_sequence.Loop,
-		markers = markers,
 	}
 end
 

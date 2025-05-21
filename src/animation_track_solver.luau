@@ -14,8 +14,6 @@ export type AnimationTrack = {
 	start_fade_time: number,
 	stop_fade_time: number,
 
-	playback_speed: number,
-
 	looped: boolean,
 }
 
@@ -30,12 +28,12 @@ local function solve_fade_time(
 	if time_into_anim <= start_fade_time then
 		local influence = 1 - ((start_fade_time - time_into_anim) / start_fade_time)
 
-		return math.min(influence, 1)
+		return (math.min(influence, 1))
 	elseif time_into_anim >= (animation_length + stop_fade_time) then
 		local influence = 1
 			- ((time_into_anim - (animation_length - stop_fade_time)) / stop_fade_time)
 
-		return math.min(influence, 1)
+		return (math.min(influence, 1))
 	end
 
 	return 1

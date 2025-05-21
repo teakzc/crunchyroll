@@ -22,7 +22,7 @@ local function get_keyframe_before(
 	local closestKeyframe: animation_asset.KeyframeNode? = nil
 	local closestDistance: number = math.huge
 
-	local specifiedTime = (alpha * length)
+	local specifiedTime = alpha * length
 
 	for _, keyframeNode in keyframeArray do
 		local distance = keyframeNode.time - specifiedTime
