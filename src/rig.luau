@@ -1,3 +1,5 @@
+local CFrame = CFrame or (require("@lune/roblox").CFrame :: typeof(CFrame))
+
 export type LimbInfo = {
 	c0: CFrame,
 	c1: CFrame,
