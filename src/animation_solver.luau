@@ -39,7 +39,8 @@ local function animation_solver(
 	},
 	root: CFrame
 )
-	local limb_array, total_weight = rig._topologically_sorted_limbs, 0
+	local limb_array: { create_rig.Limb }, result_table: { [string]: CFrame }, total_weight: number =
+		rig._topologically_sorted_limbs, rig.result_coordinate_frames, 0
 	for _, limb in limb_array do
 		limb.priority = -1
 	end
@@ -49,8 +50,9 @@ local function animation_solver(
 	end
 
 	for animation, playback in tracks do
-		local real_time = animation.length * playback.alpha
-		local influence = (playback.weight / total_weight)
+		local real_time: number, priority: number =
+			animation.length * playback.alpha, playback.priority
+		local influence: number = (playback.weight / total_weight)
 			* solve_fade_time_influence(
 				real_time,
 				animation.length,
@@ -75,38 +77,36 @@ local function animation_solver(
 
 		-- Solve limb transforms
 		for _, node in limb_array do
-			if node.priority > playback.priority then
+			if node.priority > priority then
 				continue
 			end
 
 			local left_pose, right_pose =
 				keyframe_before and keyframe_before.poses[node.name],
 				keyframe_after and keyframe_after.poses[node.name]
+			local left_or_right = left_pose or right_pose
 
 			if left_pose and right_pose then
-				node.priority = playback.priority
-				local calculated_transform = left_pose.coordinate_frame:Lerp(
-					right_pose.coordinate_frame,
-					left_pose.easing_function(
-						(real_time - left_pose.time) / (right_pose.time - left_pose.time)
-					)
-				)
-
-				node.transform = node.transform:Lerp(calculated_transform, influence)
-			elseif left_pose or right_pose then
-				node.priority = playback.priority
-				local calculated_transform = (
-					(left_pose or right_pose) :: animation_asset.PoseNode
-				).coordinate_frame
-
-				node.transform = node.transform:Lerp(calculated_transform, influence)
+				--stylua: ignore
+				node.transform, node.priority =
+					node.transform:Lerp(
+						-- Doubled lerped for blending
+						left_pose.coordinate_frame:Lerp(
+							right_pose.coordinate_frame,
+							left_pose.easing_function((real_time - left_pose.time) / (right_pose.time - left_pose.time))
+						),
+						influence
+					), priority
+			elseif left_or_right then
+				node.transform, node.priority =
+					node.transform:Lerp(left_or_right.coordinate_frame, influence), priority
 			end
 		end
 	end
 
-	rig.result_coordinate_frames["root"] = root
-	for _, limb in rig._topologically_sorted_limbs do
-		rig.result_coordinate_frames[limb.name] = rig.result_coordinate_frames[limb.depends_on]
+	result_table["root"] = root
+	for _, limb in limb_array do
+		result_table[limb.name] = result_table[limb.depends_on]
 			* limb.c0
 			* limb.transform
 			* limb.c1
