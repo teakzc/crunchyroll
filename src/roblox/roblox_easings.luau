@@ -16,32 +16,13 @@ local Easing = {
 		end,
 	},
 
-	-- [Enum.PoseEasingStyle.Quad] = {
-	-- 	[Enum.PoseEasingDirection.In] = function(Value: number): number
-	-- 		return Value * Value
-	-- 	end,
-
-	-- 	[Enum.PoseEasingDirection.Out] = function(Value: number): number
-	-- 		local Base = 1 - Value
-	-- 		return 1 - Base * Base
-	-- 	end,
-
-	-- 	[Enum.PoseEasingDirection.InOut] = function(Value: number): number
-	-- 		if Value < 0.5 then return 2 * Value * Value end
-
-	-- 		local Base = -2 * Value + 2
-	-- 		return 1 - Base * Base * 0.5
-	-- 	end,
-	-- },
-
 	[Enum.PoseEasingStyle.Cubic] = {
 		[Enum.PoseEasingDirection.In] = function(Value: number): number
 			return Value ^ 3
 		end,
 
 		[Enum.PoseEasingDirection.Out] = function(Value: number): number
-			local Base = 1 - Value
-			return 1 - (Base ^ 3)
+			return 1 - ((1 - Value) ^ 3)
 		end,
 
 		[Enum.PoseEasingDirection.InOut] = function(Value: number): number
@@ -53,110 +34,6 @@ local Easing = {
 			return 1 - (Base ^ 3) * 0.5
 		end,
 	},
-
-	-- [Enum.PoseEasingStyle.Quart] = {
-	-- 	[Enum.PoseEasingDirection.In] = function(Value: number): number
-	-- 		return Value ^ 4
-	-- 	end,
-
-	-- 	[Enum.PoseEasingDirection.Out] = function(Value: number): number
-	-- 		local Base = 1 - Value
-	-- 		return 1 - (Base ^ 4)
-	-- 	end,
-
-	-- 	[Enum.PoseEasingDirection.InOut] = function(Value: number): number
-	-- 		if Value < 0.5 then return 8 * Value ^ 4 end
-
-	-- 		local Base = -2 * Value + 2
-	-- 		return 1 - (Base ^ 4) * 0.5
-	-- 	end,
-	-- },
-
-	-- [Enum.PoseEasingStyle.Quint] = {
-	-- 	[Enum.PoseEasingDirection.In] = function(Value: number): number
-	-- 		return Value ^ 5
-	-- 	end,
-
-	-- 	[Enum.PoseEasingDirection.Out] = function(Value: number): number
-	-- 		local Base = 1 - Value
-	-- 		return 1 - (Base ^ 5)
-	-- 	end,
-
-	-- 	[Enum.PoseEasingDirection.InOut] = function(Value: number): number
-	-- 		if Value < 0.5 then return 16 * (Value ^ 5) end
-
-	-- 		local Base = -2 * Value + 2
-	-- 		return 1 - (Base ^ 5) * 0.5
-	-- 	end,
-	-- },
-
-	-- [Enum.PoseEasingStyle.Circular] = {
-	-- 	[Enum.PoseEasingDirection.In] = function(Value: number): number
-	-- 		return 1 - (1 - (Value ^ 2)) ^ 0.5
-	-- 	end,
-
-	-- 	[Enum.PoseEasingDirection.Out] = function(Value: number): number
-	-- 		local Base = Value - 1
-	-- 		return (1 - (Base ^ 2)) ^ 0.5
-	-- 	end,
-
-	-- 	[Enum.PoseEasingDirection.InOut] = function(Value: number): number
-	-- 		if Value < 0.5 then return (1 - (1 - 4 * (Value ^ 2)) ^ 0.5) * 0.5 end
-
-	-- 		local Base = -2 * Value + 2
-	-- 		return (1 + (1 - (Base ^ 2)) ^ 0.5) * 0.5
-	-- 	end,
-	-- },
-
-	-- [Enum.PoseEasingStyle.Exponential] = {
-	-- 	[Enum.PoseEasingDirection.In] = function(Value: number): number
-	-- 		return 2 ^ (10 * Value - 10)
-	-- 	end,
-	-- 	[Enum.PoseEasingDirection.Out] = function(Value: number): number
-	-- 		return 1 - 2 ^ (-10 * Value)
-	-- 	end,
-
-	-- 	[Enum.PoseEasingDirection.InOut] = function(Value: number): number
-	-- 		if Value < 0.5 then return 2 ^ (20 * Value - 11) end
-
-	-- 		return 1 - 2 ^ (-20 * Value + 9)
-	-- 	end,
-	-- },
-
-	-- [Enum.PoseEasingStyle.Sine] = {
-	-- 	[Enum.PoseEasingDirection.In] = function(Value: number): number
-	-- 		return 1 - math.cos(Value * 1.5707963267948966)
-	-- 	end,
-
-	-- 	[Enum.PoseEasingDirection.Out] = function(Value: number): number
-	-- 		return math.sin(Value * 1.5707963267948966)
-	-- 	end,
-
-	-- 	[Enum.PoseEasingDirection.InOut] = function(Value: number): number
-	-- 		return (math.cos(3.141592653589793 * Value) - 1) * -0.5
-	-- 	end,
-	-- },
-
-	-- [Enum.PoseEasingStyle.Back] = {
-	-- 	[Enum.PoseEasingDirection.In] = function(Value: number): number
-	-- 		return 2.70158 * Value * Value * Value - 1.70158 * Value * Value
-	-- 	end,
-
-	-- 	[Enum.PoseEasingDirection.Out] = function(Value: number): number
-	-- 		local Base = Value - 1
-	-- 		return 1 + 2.70158 * Base * Base * Base + 1.70158 * Base * Base
-	-- 	end,
-
-	-- 	[Enum.PoseEasingDirection.InOut] = function(Value: number): number
-	-- 		if Value < 0.5 then
-	-- 			local Base = 2 * Value
-	-- 			return Base * Base * (3.5949095 * Base - 2.5949095) * 0.5
-	-- 		end
-
-	-- 		local Base = 2 * Value - 2
-	-- 		return Base * Base * (3.5949095 * Base + 2.5949095) + 2 * 0.5
-	-- 	end,
-	-- },
 
 	[Enum.PoseEasingStyle.Bounce] = {
 		[Enum.PoseEasingDirection.In] = function(Value: number): number
