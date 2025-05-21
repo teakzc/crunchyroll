@@ -6,26 +6,59 @@ export type AnimationPlayback = {
 	alpha: number,
 
 	-- 0-1
-	influence: number,
+	start_fade_time: number,
+	stop_fade_time: number,
+	weight: number,
 
 	-- arbitrary number
 	priority: number,
 }
 
+local function solve_fade_time_influence(
+	real_time: number,
+	animation_length: number,
+	start_fade_time: number,
+	stop_fade_time: number
+): number
+	if real_time <= start_fade_time then
+		return math.min(1 - ((start_fade_time - real_time) / start_fade_time), 1)
+	elseif real_time >= (animation_length + stop_fade_time) then
+		return math.min(
+			1 - ((real_time - (animation_length - stop_fade_time)) / stop_fade_time),
+			1
+		)
+	else
+		return 1
+	end
+end
+
 local function animation_solver(
 	rig: create_rig.Identity,
-	anim_playbacks: {
+	tracks: {
 		[animation_asset.Identity]: AnimationPlayback,
 	},
 	root: CFrame
 )
-	local limb_array = rig._topologically_sorted_limbs
+	local limb_array, total_weight = rig._topologically_sorted_limbs, 0
 	for _, limb in limb_array do
 		limb.priority = -1
 	end
 
-	for animation, playback in anim_playbacks do
+	for _, track in tracks do
+		total_weight += track.weight
+	end
+
+	for animation, playback in tracks do
 		local real_time = animation.length * playback.alpha
+		local influence = (playback.weight / total_weight)
+			* solve_fade_time_influence(
+				real_time,
+				animation.length,
+				playback.start_fade_time,
+				playback.stop_fade_time
+			)
+
+		-- Figure out which keyframes to interpolate between
 		local keyframe_after: animation_asset.KeyframeNode?, closest_distance_after: number, keyframe_before: animation_asset.KeyframeNode?, closest_distance_before: number =
 			nil, math.huge, nil, math.huge
 
@@ -40,6 +73,7 @@ local function animation_solver(
 			end
 		end
 
+		-- Solve limb transforms
 		for _, node in limb_array do
 			if node.priority > playback.priority then
 				continue
@@ -58,14 +92,14 @@ local function animation_solver(
 					)
 				)
 
-				node.transform = node.transform:Lerp(calculated_transform, playback.influence)
+				node.transform = node.transform:Lerp(calculated_transform, influence)
 			elseif left_pose or right_pose then
 				node.priority = playback.priority
 				local calculated_transform = (
 					(left_pose or right_pose) :: animation_asset.PoseNode
 				).coordinate_frame
 
-				node.transform = node.transform:Lerp(calculated_transform, playback.influence)
+				node.transform = node.transform:Lerp(calculated_transform, influence)
 			end
 		end
 	end
