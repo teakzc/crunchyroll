@@ -2,8 +2,6 @@ local animation_asset = require("./roblox/animation_asset")
 local create_rig = require("./rig")
 
 export type AnimationPlayback = {
-	asset: animation_asset.Identity,
-
 	-- 0-1
 	alpha: number,
 
@@ -15,40 +13,34 @@ export type AnimationPlayback = {
 }
 
 local function get_keyframe_before(
-	alpha: number,
-	keyframeArray: { animation_asset.KeyframeNode },
-	length: number
+	keyframe_array: { animation_asset.KeyframeNode },
+	real_time: number
 ): animation_asset.KeyframeNode?
-	local closestKeyframe: animation_asset.KeyframeNode? = nil
-	local closestDistance: number = math.huge
+	local closest_keyframe: animation_asset.KeyframeNode? = nil
+	local closest_distance: number = math.huge
 
-	local specifiedTime = alpha * length
-
-	for _, keyframeNode in keyframeArray do
-		local distance = keyframeNode.time - specifiedTime
+	for _, keyframe_node in keyframe_array do
+		local distance = keyframe_node.time - real_time
 		local absoluteDistance = math.abs(distance)
 
-		if distance <= 0 and (absoluteDistance < closestDistance) then
-			closestKeyframe = keyframeNode
-			closestDistance = absoluteDistance
+		if distance <= 0 and (absoluteDistance < closest_distance) then
+			closest_keyframe = keyframe_node
+			closest_distance = absoluteDistance
 		end
 	end
 
-	return closestKeyframe
+	return closest_keyframe
 end
 
 local function get_keyframe_after(
-	alpha: number,
 	keyframeArray: { animation_asset.KeyframeNode },
-	length: number
+	real_time: number
 ): animation_asset.KeyframeNode?
 	local closestKeyframe: animation_asset.KeyframeNode? = nil
 	local closestDistance: number = math.huge
 
-	local specifiedTime = (alpha * length)
-
 	for _, keyframe in keyframeArray do
-		local distance = keyframe.time - specifiedTime
+		local distance = keyframe.time - real_time
 		local absoluteDistance = math.abs(distance)
 
 		if distance >= 0 and (absoluteDistance < closestDistance) then
@@ -83,12 +75,11 @@ local function animation_solver(
 		node.priority = -1
 	end
 
-	for _, playback in anim_playbacks do
+	for animation, playback in anim_playbacks do
+		local real_time = animation.length * playback.alpha
 		local before_keyframe, after_keyframe =
-			get_keyframe_before(playback.alpha, playback.asset.keyframes, playback.asset.length),
-			get_keyframe_after(playback.alpha, playback.asset.keyframes, playback.asset.length)
-
-		local lerp_alpha = playback.asset.length * playback.alpha
+			get_keyframe_before(animation.keyframes, real_time),
+			get_keyframe_after(animation.keyframes, real_time)
 
 		for _, node in limb_info_array do
 			if node.priority > playback.priority then
@@ -104,7 +95,7 @@ local function animation_solver(
 				local calculated_transform = left_pose.coordinate_frame:Lerp(
 					right_pose.coordinate_frame,
 					left_pose.easing_function(
-						(lerp_alpha - left_pose.time) / (right_pose.time - left_pose.time)
+						(real_time - left_pose.time) / (right_pose.time - left_pose.time)
 					)
 				)
 

@@ -38,8 +38,6 @@ RunService.RenderStepped:Connect(function(delta_time)
 	-- HumanoidRootPart.CFrame for the root CFrame
 	crunchyroll.solve_animation(rig, {
 		[animation] = {
-			asset = animation,
-
 			priority = 1,
 			influence = 1,
 
