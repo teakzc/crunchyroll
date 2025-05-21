@@ -3,3 +3,19 @@ name = "ffrostfall/crunchyroll"
 version = "0.0.0-a"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
+exclude = [
+	".github",
+	".lune",
+	".vscode",
+	"tests",
+	"types",
+	"vendor",
+	".gitattributes",
+	".gitignore",
+	".styluaignore",
+	"README.md",
+	"roblox-tests.project.json",
+	"rokit.toml",
+	"sourcemap.json",
+	"stylua.toml",
+]
