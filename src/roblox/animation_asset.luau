@@ -1,4 +1,4 @@
-local roblox_easings = require("./roblox_easings")
+local easing_enum_map = require("./easing_enum_map")
 
 export type PoseNode = {
 	easing_direction: Enum.PoseEasingDirection,
@@ -40,7 +40,7 @@ local function recursive_tree_from_pose(
 
 		coordinate_frame = root_pose.CFrame,
 
-		easing_function = roblox_easings[root_pose.EasingStyle][root_pose.EasingDirection],
+		easing_function = easing_enum_map[root_pose.EasingStyle][root_pose.EasingDirection],
 
 		name = root_pose.Name,
 		time = if keyframe then keyframe.Time else 0.5,
