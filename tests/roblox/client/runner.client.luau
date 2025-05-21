@@ -39,7 +39,10 @@ RunService.RenderStepped:Connect(function(delta_time)
 	crunchyroll.solve_animation(rig, {
 		[animation] = {
 			priority = 1,
-			influence = 1,
+
+			start_fade_time = 0,
+			stop_fade_time = 0,
+			weight = 1,
 
 			alpha = alpha,
 		},
