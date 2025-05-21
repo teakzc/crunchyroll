@@ -1,0 +1,58 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local crunchyroll = require(ReplicatedStorage.crunchyroll)
+local rig = require("./rig")
+
+local TEST_TRANSFORM = CFrame.new(10, 0, -0) * CFrame.fromEulerAnglesYXZ(0, math.rad(90), 0)
+
+local keyframe_sequence = ReplicatedStorage.assets.animation
+local character_template = ReplicatedStorage.assets.character
+
+local function spawn_character()
+	local spawned_rig = character_template:Clone()
+
+	for _, child in spawned_rig:GetChildren() do
+		if child:IsA("BasePart") then
+			child.Anchored = true
+		end
+	end
+
+	spawned_rig:PivotTo(TEST_TRANSFORM)
+
+	-- strict datamodel types, lol.
+	spawned_rig.Parent = workspace :: any
+
+	return spawned_rig
+end
+
+local animation = crunchyroll.load_keyframe_sequence(keyframe_sequence)
+local alpha = 0
+local character = spawn_character()
+
+RunService.RenderStepped:Connect(function(delta_time)
+	-- loop the animation
+	alpha += delta_time / animation.length
+	alpha %= 1
+
+	-- HumanoidRootPart.CFrame for the root CFrame
+	crunchyroll.solve_animation(rig, {
+		[animation] = {
+			asset = animation,
+
+			priority = 1,
+			influence = 1,
+
+			alpha = alpha,
+		},
+	}, character.HumanoidRootPart.CFrame)
+
+	character["Left Arm"].CFrame = rig.result["Left Arm"]
+	character["Right Arm"].CFrame = rig.result["Right Arm"]
+
+	character["Left Leg"].CFrame = rig.result["Left Leg"]
+	character["Right Leg"].CFrame = rig.result["Right Leg"]
+
+	character["Torso"].CFrame = rig.result["Torso"]
+	character["Head"].CFrame = rig.result["Head"]
+end)
