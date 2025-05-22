@@ -23,4 +23,6 @@ exclude = [
 	"build.rbxl.lock",
 	"crunchyroll.rbxm",
 	"docs",
+	"why-is-it-named-crunchyroll.md",
+	"assets",
 ]
