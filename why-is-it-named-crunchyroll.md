@@ -1,1 +1,1 @@
-![Ariel said so](important-history.png)
+![Ariel said so](assets/important-history.png)
