@@ -1,7 +1,7 @@
 local animation_asset = require("./roblox/animation_asset")
 local create_rig = require("./rig")
 
-export type AnimationPlayback = {
+export type AnimationTrack = {
 	-- 0-1
 	alpha: number,
 
@@ -35,11 +35,11 @@ end
 local function animation_solver(
 	rig: create_rig.Identity,
 	tracks: {
-		[animation_asset.Identity]: AnimationPlayback,
+		[animation_asset.Identity]: AnimationTrack,
 	},
 	root: CFrame
 )
-	local limb_array: { create_rig.Limb }, result_table: { [string]: CFrame }, total_weight: number =
+	local limb_array: { create_rig.Limb }, result_coordinate_frames: { [string]: CFrame }, total_weight: number =
 		rig._topologically_sorted_limbs, rig.result_coordinate_frames, 0
 	for _, limb in limb_array do
 		limb.priority = -1
@@ -104,9 +104,9 @@ local function animation_solver(
 		end
 	end
 
-	result_table["root"] = root
+	result_coordinate_frames["root"] = root
 	for _, limb in limb_array do
-		result_table[limb.name] = result_table[limb.depends_on]
+		result_coordinate_frames[limb.name] = result_coordinate_frames[limb.depends_on]
 			* limb.c0
 			* limb.transform
 			* limb.c1
