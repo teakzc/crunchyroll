@@ -18,6 +18,7 @@ exclude = [
 	"rokit.toml",
 	"sourcemap.json",
 	"stylua.toml",
+	"build",
 	"build.rbxl",
 	"build.rbxl.lock",
 	"crunchyroll.rbxm",
