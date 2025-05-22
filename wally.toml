@@ -1,6 +1,6 @@
 [package]
 name = "ffrostfall/crunchyroll"
-version = "0.0.0-b"
+version = "0.1.0"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 exclude = [
