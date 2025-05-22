@@ -19,4 +19,6 @@ exclude = [
 	"sourcemap.json",
 	"stylua.toml",
 	"build.rbxl",
+	"build.rbxl.lock",
+	"docs",
 ]
