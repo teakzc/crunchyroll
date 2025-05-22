@@ -1,5 +1,13 @@
 # Crunchyroll
 
+
+https://github.com/user-attachments/assets/51bbde10-b439-431e-9e85-a808a9303f0f
+
+
+no Animator!
+
+---
+
 Crunchyroll is a dedicated library for calculating coordinates frames of a rig from an array of animation tracks. You can define a rig by calling `crunchyroll.create_rig`, which is a representation of Roblox Motor6Ds. You can then pass this rig into `crunchyroll.solve_animation`, which also takes animation tracks. These are tables which are similar to Roblox's `AnimationTrack`s. Similar to AnimationTracks, you need an animation "asset". You can load a Roblox animation by calling `crunchyroll.load_keyframe_sequence`. Crunchyroll will then give you the coordinate frames of the "limbs" (think Torso, Head, "Left Leg", UpperTorso etc.), and that's it!
 
 # Why use this?
