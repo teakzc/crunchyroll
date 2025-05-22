@@ -20,5 +20,6 @@ exclude = [
 	"stylua.toml",
 	"build.rbxl",
 	"build.rbxl.lock",
+	"crunchyroll.rbxm",
 	"docs",
 ]
