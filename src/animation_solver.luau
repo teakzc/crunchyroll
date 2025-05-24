@@ -76,17 +76,14 @@ local function animation_solver(
 			)
 
 		-- Figure out which keyframes to interpolate between
-		local keyframe_after: animation_asset.KeyframeNode?, closest_distance_after: number, keyframe_before: animation_asset.KeyframeNode?, closest_distance_before: number =
-			nil, math.huge, nil, math.huge
+		local keyframe_after: animation_asset.KeyframeNode?
+		local keyframe_before: animation_asset.KeyframeNode?
 
-		for _, keyframe in animation.keyframes do
-			local distance = keyframe.time - real_time
-			local absolute_distance = math.abs(distance)
-
-			if distance >= 0 and (absolute_distance < closest_distance_after) then
-				keyframe_after, closest_distance_after = keyframe, absolute_distance
-			elseif distance <= 0 and (absolute_distance < closest_distance_before) then
-				keyframe_before, closest_distance_before = keyframe, absolute_distance
+		for index, keyframe in animation.keyframes do
+			if keyframe.time >= real_time then
+				keyframe_after = keyframe
+				keyframe_before = animation.keyframes[index - 1]
+				break
 			end
 		end
 
@@ -96,7 +93,7 @@ local function animation_solver(
 				continue
 			end
 
-			local left_pose: animation_asset.PoseNode, right_pose: animation_asset.PoseNode =
+			local left_pose: animation_asset.PoseNode?, right_pose: animation_asset.PoseNode? =
 				keyframe_before and keyframe_before.poses[node.name],
 				keyframe_after and keyframe_after.poses[node.name]
 			local left_or_right = left_pose or right_pose
