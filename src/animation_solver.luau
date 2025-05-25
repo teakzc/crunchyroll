@@ -54,20 +54,20 @@ local function animation_solver(
 	},
 	root: CFrame
 )
-	local limb_array: { create_rig.Limb }, result_coordinate_frames: { [string]: CFrame }, total_weight: number =
-		rig._topologically_sorted_limbs, rig.result_coordinate_frames, 0
+	local limb_array: { create_rig.Limb } = rig._topologically_sorted_limbs
 	for _, limb in limb_array do
 		limb.priority = -1
 	end
 
+	local total_weight = 0
 	for _, track in tracks do
 		total_weight += track.weight
 	end
 
 	for animation, playback in tracks do
-		local real_time: number, priority: number =
-			animation.length * playback.alpha, playback.priority
-		local influence: number = (playback.weight / total_weight)
+		local priority = playback.priority
+		local real_time = animation.length * playback.alpha
+		local influence = (playback.weight / total_weight)
 			* solve_fade_time_influence(
 				real_time,
 				animation.length,
@@ -76,13 +76,19 @@ local function animation_solver(
 			)
 
 		-- Figure out which keyframes to interpolate between
-		local keyframe_after: animation_asset.KeyframeNode?
-		local keyframe_before: animation_asset.KeyframeNode?
+		local time_after: number?
+		local time_before: number?
+		local poses_after: animation_asset.Poses?
+		local poses_before: animation_asset.Poses?
 
-		for index, keyframe in animation.keyframes do
-			if keyframe.time >= real_time then
-				keyframe_after = keyframe
-				keyframe_before = animation.keyframes[index - 1]
+		for index, keyframe_time in animation.keyframe_times do
+			if keyframe_time >= real_time then
+				time_after = keyframe_time
+				poses_after = animation.keyframe_poses[index]
+
+				time_before = animation.keyframe_times[index - 1]
+				poses_before = animation.keyframe_poses[index - 1]
+
 				break
 			end
 		end
@@ -93,14 +99,13 @@ local function animation_solver(
 				continue
 			end
 
-			local left_pose: animation_asset.PoseNode?, right_pose: animation_asset.PoseNode? =
-				keyframe_before and keyframe_before.poses[node.name],
-				keyframe_after and keyframe_after.poses[node.name]
+			local left_pose: animation_asset.PoseNode? = poses_before and poses_before[node.name]
+			local right_pose: animation_asset.PoseNode? = poses_after and poses_after[node.name]
 			local left_or_right = left_pose or right_pose
 
 			--stylua: ignore start
 			if left_pose and right_pose then
-				local alpha = left_pose.easing_function((real_time - left_pose.time) / (right_pose.time - left_pose.time))
+				local alpha = left_pose.easing_function((real_time - (time_before :: number)) / ((time_after :: number) - (time_before :: number)))
 				local position = vector_lerp(left_pose.position, right_pose.position, alpha)
 				local quat_vector, quat_scalar = quat_nlerp(
 					left_pose.quat_vector, left_pose.quat_scalar, 
@@ -127,7 +132,9 @@ local function animation_solver(
 		end
 	end
 
+	local result_coordinate_frames: { [string]: CFrame } = rig.result_coordinate_frames
 	result_coordinate_frames["root"] = root
+
 	for _, limb in limb_array do
 		local position = limb.position
 		local quat_vector = limb.quat_vector

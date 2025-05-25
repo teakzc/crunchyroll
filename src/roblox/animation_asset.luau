@@ -1,28 +1,22 @@
 local easing_enum_map = require("./easing_enum_map")
 
 export type PoseNode = {
-	easing_direction: Enum.PoseEasingDirection,
-	easing_style: Enum.PoseEasingStyle,
-
-	easing_function: (alpha: number) -> number,
-
 	position: vector,
-	--- xyz components of a unit quaternion
 	quat_vector: vector,
 	quat_scalar: number,
-
-	name: string,
-	time: number,
+	easing_function: (alpha: number) -> number,
 }
 
-export type KeyframeNode = {
+type KeyframeNode = {
 	time: number,
-
 	poses: { [string]: PoseNode },
 }
 
+export type Poses = { [string]: PoseNode }
+
 export type Identity = {
-	keyframes: { KeyframeNode },
+	keyframe_times: { number },
+	keyframe_poses: { Poses },
 	length: number,
 }
 
@@ -46,17 +40,10 @@ local function recursive_tree_from_pose(
 	local quat_scalar = math.cos(half_angle)
 
 	poses[root_pose.Name] = {
-		easing_direction = root_pose.EasingDirection,
-		easing_style = root_pose.EasingStyle,
-
 		position = position,
 		quat_vector = quat_vector,
 		quat_scalar = quat_scalar,
-
 		easing_function = easing_enum_map[root_pose.EasingStyle][root_pose.EasingDirection],
-
-		name = root_pose.Name,
-		time = if keyframe then keyframe.Time else 0.5,
 	}
 end
 
@@ -64,8 +51,9 @@ local animation_asset = {}
 
 function animation_asset.load_keyframe_sequence(keyframe_sequence: KeyframeSequence): Identity
 	local keyframes = keyframe_sequence:GetKeyframes() :: { Keyframe }
-	local keyframe_nodes: { KeyframeNode } = {}
+
 	local markers = {}
+	local keyframe_nodes: { KeyframeNode } = {}
 
 	for keyframe_index, keyframe in keyframes do
 		for _, marker in keyframe:GetMarkers() :: { KeyframeMarker } do
@@ -87,12 +75,19 @@ function animation_asset.load_keyframe_sequence(keyframe_sequence: KeyframeSeque
 		return left.time < right.time
 	end)
 
-	local top = keyframe_nodes[#keyframe_nodes]
+	local length = keyframe_nodes[#keyframe_nodes].time
+	local keyframe_times = {}
+	local keyframe_poses = {}
+
+	for index, keyframe_node in keyframe_nodes do
+		keyframe_times[index] = keyframe_node.time
+		keyframe_poses[index] = keyframe_node.poses
+	end
 
 	return {
-		keyframes = keyframe_nodes,
-
-		length = top.time,
+		keyframe_times = keyframe_times,
+		keyframe_poses = keyframe_poses,
+		length = length,
 	}
 end
 
