@@ -3,9 +3,12 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local create_bench = require(ReplicatedStorage.benches.create_bench)
 local crunchyroll = require(ReplicatedStorage.crunchyroll)
 local mirror_crunchyroll = require(ReplicatedStorage.benches.mirrors.crunchyroll)
-local rig = require(ReplicatedStorage.client.rig)
+local rig_template = require(ReplicatedStorage.client.rig) :: any
 
-local animation = crunchyroll.load_keyframe_sequence(ReplicatedStorage.assets.animation)
+local rig = crunchyroll.create_rig(rig_template)
+local mirror_rig = mirror_crunchyroll.create_rig(rig_template)
+
+local animation = crunchyroll.load_keyframe_sequence(ReplicatedStorage.assets.animation, rig)
 local mirror_animation =
 	mirror_crunchyroll.load_keyframe_sequence(ReplicatedStorage.assets.animation)
 
@@ -28,7 +31,7 @@ return create_bench(function() end, {
 
 	["mirror"] = function()
 		for i = 1, 500 do
-			mirror_crunchyroll.solve_animation(rig, {
+			mirror_crunchyroll.solve_animation(mirror_rig, {
 				[mirror_animation] = {
 					priority = 1,
 
