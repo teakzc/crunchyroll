@@ -1,4 +1,5 @@
 local easing_enum_map = require("./easing_enum_map")
+local rig = require("../rig")
 
 export type PoseNode = {
 	position: vector,
@@ -7,12 +8,12 @@ export type PoseNode = {
 	easing_function: (alpha: number) -> number,
 }
 
+export type Poses = { PoseNode }
+
 type KeyframeNode = {
 	time: number,
 	poses: { [string]: PoseNode },
 }
-
-export type Poses = { [string]: PoseNode }
 
 export type Identity = {
 	keyframe_times: { number },
@@ -49,7 +50,10 @@ end
 
 local animation_asset = {}
 
-function animation_asset.load_keyframe_sequence(keyframe_sequence: KeyframeSequence): Identity
+function animation_asset.load_keyframe_sequence(
+	keyframe_sequence: KeyframeSequence,
+	rig: rig.Identity
+): Identity
 	local keyframes = keyframe_sequence:GetKeyframes() :: { Keyframe }
 
 	local markers = {}
@@ -79,9 +83,18 @@ function animation_asset.load_keyframe_sequence(keyframe_sequence: KeyframeSeque
 	local keyframe_times = {}
 	local keyframe_poses = {}
 
+	local limb_name_to_index = rig._limb_name_to_index
 	for index, keyframe_node in keyframe_nodes do
+		local mapped_poses: Poses = {}
+		for name, pose in keyframe_node.poses do
+			local limb_index = limb_name_to_index[name]
+			if limb_index ~= nil then
+				mapped_poses[limb_index] = pose
+			end
+		end
+
+		keyframe_poses[index] = mapped_poses
 		keyframe_times[index] = keyframe_node.time
-		keyframe_poses[index] = keyframe_node.poses
 	end
 
 	return {

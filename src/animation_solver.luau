@@ -58,8 +58,8 @@ local function animation_solver(
 	},
 	root: CFrame
 )
-	local limb_array: { create_rig.Limb } = rig._topologically_sorted_limbs
-	for _, limb in limb_array do
+	local limb_transforms = rig._limb_transforms
+	for _, limb in limb_transforms do
 		limb.priority = -1
 	end
 
@@ -98,13 +98,13 @@ local function animation_solver(
 		end
 
 		-- Solve limb transforms
-		for _, node in limb_array do
+		for index, node in limb_transforms do
 			if node.priority > priority then
 				continue
 			end
 
-			local left_pose: animation_asset.PoseNode? = poses_before and poses_before[node.name]
-			local right_pose: animation_asset.PoseNode? = poses_after and poses_after[node.name]
+			local left_pose: animation_asset.PoseNode? = poses_before and poses_before[index]
+			local right_pose: animation_asset.PoseNode? = poses_after and poses_after[index]
 			local left_or_right = left_pose or right_pose
 
 			--stylua: ignore start
@@ -139,14 +139,17 @@ local function animation_solver(
 	local result_coordinate_frames: { [string]: CFrame } = rig.result_coordinate_frames
 	result_coordinate_frames["root"] = root
 
-	for _, limb in limb_array do
-		local position = limb.position
-		local quat_vector = limb.quat_vector
+	for index, limb in rig._limbs do
+		local limb_transform = limb_transforms[index]
+
+		local position = limb_transform.position
+		local quat_vector = limb_transform.quat_vector
+		local quat_scalar = limb_transform.quat_scalar
 
 		--stylua: ignore
 		local transform = CFrame.new(
 			position.X, position.Y, position.Z,
-			quat_vector.X, quat_vector.Y, quat_vector.Z, limb.quat_scalar
+			quat_vector.X, quat_vector.Y, quat_vector.Z, quat_scalar
 		)
 
 		result_coordinate_frames[limb.name] = result_coordinate_frames[limb.depends_on]

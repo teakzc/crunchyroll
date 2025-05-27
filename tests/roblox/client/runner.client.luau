@@ -26,7 +26,7 @@ local function spawn_character()
 	return spawned_rig
 end
 
-local animation = crunchyroll.load_keyframe_sequence(keyframe_sequence)
+local animation = crunchyroll.load_keyframe_sequence(keyframe_sequence, rig)
 local alpha = 0
 local character = spawn_character()
 
