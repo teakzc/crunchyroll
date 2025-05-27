@@ -1,5 +1,7 @@
 {
 	"name": "crunchyroll-test",
+	
+	"globIgnorePaths": [ "**/mirror_list/**" ],
 
 	"emitLegacyScripts": false,
 
@@ -13,6 +15,10 @@
 
 			"assets": {
 				"$path": "tests/roblox/assets"
+			},
+			
+			"benches": {
+				"$path": "benches"
 			},
 
 			"crunchyroll": {
