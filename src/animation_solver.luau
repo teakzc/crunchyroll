@@ -105,33 +105,37 @@ local function animation_solver(
 
 			local left_pose: animation_asset.PoseNode? = poses_before and poses_before[index]
 			local right_pose: animation_asset.PoseNode? = poses_after and poses_after[index]
-			local left_or_right = left_pose or right_pose
+
+			if left_pose == nil and right_pose == nil then
+				continue
+			end
+
+			local left_or_right = (left_pose or right_pose) :: animation_asset.PoseNode
+
+			local position = left_or_right.position
+			local quat_vector = left_or_right.quat_vector
+			local quat_scalar = left_or_right.quat_scalar
 
 			--stylua: ignore start
 			if left_pose and right_pose then
 				local alpha = left_pose.easing_function((real_time - (time_before :: number)) / ((time_after :: number) - (time_before :: number)))
-				local position = vector_lerp(left_pose.position, right_pose.position, alpha)
-				local quat_vector, quat_scalar = quat_nlerp(
-					left_pose.quat_vector, left_pose.quat_scalar, 
+				-- we can take advantage of position = left_or_right.position 
+				-- because left_or_right will always be left_pose if left_pose and right_pose ~= nil
+				position = vector_lerp(position, right_pose.position, alpha)
+				quat_vector, quat_scalar = quat_nlerp(
+					quat_vector, quat_scalar, 
 					right_pose.quat_vector, right_pose.quat_scalar, 
 					alpha
 				)
-
-				node.position = vector_lerp(node.position, position, influence)
-				node.quat_vector, node.quat_scalar = quat_nlerp(
-					node.quat_vector, node.quat_scalar, 
-					quat_vector, quat_scalar, 
-					influence
-				)
-				node.priority = priority
-			elseif left_or_right then
-				node.position = vector_lerp(node.position, left_or_right.position, influence)
-				node.quat_vector, node.quat_scalar = quat_nlerp(
-					node.quat_vector, node.quat_scalar, 
-					left_or_right.quat_vector, left_or_right.quat_scalar, influence
-				)
-				node.priority = priority
 			end
+
+			node.priority = priority
+			node.position = vector_lerp(node.position, position, influence)
+			node.quat_vector, node.quat_scalar = quat_nlerp(
+				node.quat_vector, node.quat_scalar, 
+				quat_vector, quat_scalar, 
+				influence
+			)
 			--stylua: ignore end
 		end
 	end
