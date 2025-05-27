@@ -1,4 +1,4 @@
-type Profiler = { Begin: (label: string) -> (), stop: () -> () }
+export type Profiler = { Begin: (label: string) -> (), stop: () -> () }
 
 local function create_bench<T...>(
 	parameter_generator: () -> T...,

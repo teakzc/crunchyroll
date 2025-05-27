@@ -1,25 +1,23 @@
 local easing_enum_map = require("./easing_enum_map")
+local rig = require("../rig")
 
 export type PoseNode = {
-	easing_direction: Enum.PoseEasingDirection,
-	easing_style: Enum.PoseEasingStyle,
-
+	position: vector,
+	quat_vector: vector,
+	quat_scalar: number,
 	easing_function: (alpha: number) -> number,
-
-	coordinate_frame: CFrame,
-
-	name: string,
-	time: number,
 }
 
-export type KeyframeNode = {
-	time: number,
+export type Poses = { PoseNode }
 
+type KeyframeNode = {
+	time: number,
 	poses: { [string]: PoseNode },
 }
 
 export type Identity = {
-	keyframes: { KeyframeNode },
+	keyframe_times: { number },
+	keyframe_poses: { Poses },
 	length: number,
 }
 
@@ -34,25 +32,32 @@ local function recursive_tree_from_pose(
 		recursive_tree_from_pose(keyframe, poses, sub_pose)
 	end
 
+	local cframe = root_pose.CFrame
+	local axis, angle = cframe:ToAxisAngle()
+
+	local half_angle = angle / 2
+	local position = cframe.Position
+	local quat_vector = axis * math.sin(half_angle)
+	local quat_scalar = math.cos(half_angle)
+
 	poses[root_pose.Name] = {
-		easing_direction = root_pose.EasingDirection,
-		easing_style = root_pose.EasingStyle,
-
-		coordinate_frame = root_pose.CFrame,
-
+		position = position,
+		quat_vector = quat_vector,
+		quat_scalar = quat_scalar,
 		easing_function = easing_enum_map[root_pose.EasingStyle][root_pose.EasingDirection],
-
-		name = root_pose.Name,
-		time = if keyframe then keyframe.Time else 0.5,
 	}
 end
 
 local animation_asset = {}
 
-function animation_asset.load_keyframe_sequence(keyframe_sequence: KeyframeSequence): Identity
+function animation_asset.load_keyframe_sequence(
+	keyframe_sequence: KeyframeSequence,
+	rig: rig.Identity
+): Identity
 	local keyframes = keyframe_sequence:GetKeyframes() :: { Keyframe }
-	local keyframe_nodes: { KeyframeNode } = {}
+
 	local markers = {}
+	local keyframe_nodes: { KeyframeNode } = {}
 
 	for keyframe_index, keyframe in keyframes do
 		for _, marker in keyframe:GetMarkers() :: { KeyframeMarker } do
@@ -74,12 +79,28 @@ function animation_asset.load_keyframe_sequence(keyframe_sequence: KeyframeSeque
 		return left.time < right.time
 	end)
 
-	local top = keyframe_nodes[#keyframe_nodes]
+	local length = keyframe_nodes[#keyframe_nodes].time
+	local keyframe_times = {}
+	local keyframe_poses = {}
+
+	local limb_name_to_index = rig._limb_name_to_index
+	for index, keyframe_node in keyframe_nodes do
+		local mapped_poses: Poses = {}
+		for name, pose in keyframe_node.poses do
+			local limb_index = limb_name_to_index[name]
+			if limb_index ~= nil then
+				mapped_poses[limb_index] = pose
+			end
+		end
+
+		keyframe_poses[index] = mapped_poses
+		keyframe_times[index] = keyframe_node.time
+	end
 
 	return {
-		keyframes = keyframe_nodes,
-
-		length = top.time,
+		keyframe_times = keyframe_times,
+		keyframe_poses = keyframe_poses,
+		length = length,
 	}
 end
 

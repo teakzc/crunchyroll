@@ -1,44 +1,22 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local create_bench = require(ReplicatedStorage.benches.create_bench)
-local crunchyroll = require(ReplicatedStorage.crunchyroll)
-local mirror_crunchyroll = require(ReplicatedStorage.benches.mirrors.crunchyroll)
-local rig = require(ReplicatedStorage.client.rig)
+local create_entry = require(ReplicatedStorage.benches.create_entry)
 
-local animation = crunchyroll.load_keyframe_sequence(ReplicatedStorage.assets.animation)
-local mirror_animation =
-	mirror_crunchyroll.load_keyframe_sequence(ReplicatedStorage.assets.animation)
+type Crunchyroll = create_entry.Crunchyroll
 
-return create_bench(function() end, {
-	["new"] = function()
-		for i = 1, 500 do
-			crunchyroll.solve_animation(rig, {
-				[animation] = {
-					priority = 1,
+local entries = {
+	latest = create_entry(require(ReplicatedStorage.crunchyroll:Clone()) :: Crunchyroll),
+}
 
-					start_fade_time = 0,
-					stop_fade_time = 0,
-					weight = 1,
+for _, mirror in ReplicatedStorage.benches.mirrors:GetChildren() do
+	local label = mirror.Name
+	assert(entries[label] == nil, `duplicate bench entry "{label}"`)
 
-					alpha = 0.5,
-				},
-			}, CFrame.identity)
-		end
-	end,
+	local module = assert(mirror:FindFirstChild("crunchyroll"))
+	local library = (require)(module:Clone()) :: Crunchyroll
 
-	["mirror"] = function()
-		for i = 1, 500 do
-			mirror_crunchyroll.solve_animation(rig, {
-				[mirror_animation] = {
-					priority = 1,
+	entries[label] = create_entry(library)
+end
 
-					start_fade_time = 0,
-					stop_fade_time = 0,
-					weight = 1,
-
-					alpha = 0.5,
-				},
-			}, CFrame.identity)
-		end
-	end,
-})
+return create_bench(function() end, entries)

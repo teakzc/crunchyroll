@@ -2,7 +2,9 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
 local crunchyroll = require(ReplicatedStorage.crunchyroll)
-local rig = require("./rig")
+local rig_template = require("./rig") :: any
+
+local rig = crunchyroll.create_rig(rig_template)
 
 local TEST_TRANSFORM = CFrame.new(10, 0, -0) * CFrame.fromEulerAnglesYXZ(0, math.rad(90), 0)
 
@@ -26,7 +28,7 @@ local function spawn_character()
 	return spawned_rig
 end
 
-local animation = crunchyroll.load_keyframe_sequence(keyframe_sequence)
+local animation = crunchyroll.load_keyframe_sequence(keyframe_sequence, rig)
 local alpha = 0
 local character = spawn_character()
 

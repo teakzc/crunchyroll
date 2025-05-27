@@ -1,8 +1,4 @@
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-
-local crunchyroll = require(ReplicatedStorage.crunchyroll)
-
-local rig = crunchyroll.create_rig({
+return {
 	name = "Torso",
 
 	c0 = CFrame.new(0, 0, 0, -1, 0, 0, 0, 0, 1, 0, 1, -0),
@@ -35,6 +31,4 @@ local rig = crunchyroll.create_rig({
 			c1 = CFrame.new(-0.5, 0.5, 0, 0, 0, 1, 0, 1, -0, -1, 0, 0),
 		},
 	},
-})
-
-return rig
+}

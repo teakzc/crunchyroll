@@ -1,11 +1,7 @@
-local CFrame = CFrame or (require("@lune/roblox").CFrame :: typeof(CFrame))
-
 export type LimbInfo = {
 	c0: CFrame,
 	c1: CFrame,
-
 	name: string,
-
 	children: { LimbInfo }?,
 }
 
@@ -14,13 +10,20 @@ export type Limb = {
 	c0: CFrame,
 	c1: CFrame,
 	depends_on: string,
+}
 
+export type LimbTransform = {
 	priority: number,
-	transform: CFrame,
+	position: vector,
+	quat_vector: vector,
+	quat_scalar: number,
 }
 
 export type Identity = {
-	_topologically_sorted_limbs: { Limb },
+	_limbs: { Limb },
+	_limb_transforms: { LimbTransform },
+	--- used in animation loading to quickly map pose name to limb index
+	_limb_name_to_index: { [string]: number },
 
 	result_coordinate_frames: { [string]: CFrame },
 }
@@ -34,36 +37,42 @@ local function topological_sort(array: { Limb }, node: LimbInfo)
 		table.insert(array, {
 			name = value.name,
 			depends_on = node.name,
-
 			c0 = value.c0,
 			c1 = value.c1:Inverse(),
-
-			priority = -1,
-			transform = CFrame.identity,
 		})
 
 		topological_sort(array, value)
 	end
 end
 
-local function create_rig(limb: LimbInfo): Identity
-	local limb_arr = {}
-
-	table.insert(limb_arr, {
-		name = limb.name,
+local function create_rig(root: LimbInfo): Identity
+	local limbs: { Limb } = {}
+	table.insert(limbs, {
+		name = root.name,
 		depends_on = "root",
-
-		c0 = limb.c0,
-		c1 = limb.c1:Inverse(),
-
-		priority = -1,
-		transform = CFrame.identity,
+		c0 = root.c0,
+		c1 = root.c1:Inverse(),
 	})
 
-	topological_sort(limb_arr, limb)
+	topological_sort(limbs, root)
+
+	local limb_transforms: { LimbTransform } = {}
+	local limb_name_to_index: { [string]: number } = {}
+
+	for index, limb in limbs do
+		limb_transforms[index] = {
+			priority = -1,
+			position = vector.zero,
+			quat_vector = vector.zero,
+			quat_scalar = 1,
+		}
+		limb_name_to_index[limb.name] = index
+	end
 
 	return {
-		_topologically_sorted_limbs = limb_arr,
+		_limbs = limbs,
+		_limb_transforms = limb_transforms,
+		_limb_name_to_index = limb_name_to_index,
 
 		result_coordinate_frames = {},
 	}
