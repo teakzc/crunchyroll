@@ -6,7 +6,7 @@ local create_entry = require(ReplicatedStorage.benches.create_entry)
 type Crunchyroll = create_entry.Crunchyroll
 
 local entries = {
-	latest = create_entry(require(ReplicatedStorage.crunchyroll) :: Crunchyroll),
+	latest = create_entry(require(ReplicatedStorage.crunchyroll:Clone()) :: Crunchyroll),
 }
 
 for _, mirror in ReplicatedStorage.benches.mirrors:GetChildren() do
