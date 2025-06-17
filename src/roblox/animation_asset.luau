@@ -36,16 +36,17 @@ local function recursive_tree_from_pose(
 	local axis, angle = cframe:ToAxisAngle()
 
 	local half_angle = angle / 2
-	local position = cframe.Position
+	local position = cframe.Position :: any
 	local quat_vector = axis * math.sin(half_angle)
 	local quat_scalar = math.cos(half_angle)
 
+	-- TODO weird type error
 	poses[root_pose.Name] = {
 		position = position,
 		quat_vector = quat_vector,
 		quat_scalar = quat_scalar,
 		easing_function = easing_enum_map[root_pose.EasingStyle][root_pose.EasingDirection],
-	}
+	} :: any
 end
 
 local animation_asset = {}
