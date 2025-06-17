@@ -89,18 +89,25 @@ local function animation_solver(
 		local time_before: number?
 		local poses_after: animation_asset.Poses?
 		local poses_before: animation_asset.Poses?
+		local keyframe_times = animation.keyframe_times
 
-		for index, keyframe_time in animation.keyframe_times do
-			if keyframe_time >= real_time then
-				time_after = keyframe_time
-				poses_after = animation.keyframe_poses[index]
+		local high: number = #keyframe_times
+		local low: number = 1
 
-				time_before = animation.keyframe_times[index - 1]
-				poses_before = animation.keyframe_poses[index - 1]
+		while high > low do
+			local index: number = bit32.rshift(low + high, 1)
 
-				break
+			if keyframe_times[index + 1] >= real_time then
+				high = index
+			else
+				low = index + 1
 			end
 		end
+
+		time_after = keyframe_times[high]
+		time_before = keyframe_times[high - 1]
+		poses_after = animation.keyframe_poses[high]
+		poses_before = animation.keyframe_poses[high - 1]
 
 		-- Solve limb transforms
 		for index, node in limb_transforms do
@@ -153,8 +160,8 @@ local function animation_solver(
 
 		--stylua: ignore
 		local transform = CFrame.new(
-			position.X, position.Y, position.Z,
-			quat_vector.X, quat_vector.Y, quat_vector.Z, quat_scalar
+			position.x, position.y, position.z,
+			quat_vector.x, quat_vector.y, quat_vector.z, quat_scalar
 		)
 
 		result_coordinate_frames[limb.name] = result_coordinate_frames[limb.depends_on]
