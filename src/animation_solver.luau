@@ -1,5 +1,4 @@
 --!optimize 2
-
 local animation_asset = require("./roblox/animation_asset")
 local create_rig = require("./rig")
 
@@ -24,12 +23,18 @@ local function vector_lerp(a: vector, b: vector, t: number): vector
 	return a + (b - a) * t
 end
 
-local function quat_nlerp(a_vector: vector, a_scalar: number, b_vector: vector, b_scalar, t: number)
+local function quat_nlerp(
+	a_vector: vector,
+	a_scalar: number,
+	b_vector: vector,
+	b_scalar: number,
+	t: number
+): (vector, number)
 	local quat_vector = vector_lerp(a_vector, b_vector, t)
 	local quat_scalar = number_lerp(a_scalar, b_scalar, t)
 
 	--stylua: ignore
-	local magnitude = math.sqrt(quat_vector.X^2 + quat_vector.Y^2 + quat_vector.Z^2 + quat_scalar^2)
+	local magnitude = math.sqrt((vector.dot(quat_vector, quat_vector) + (quat_scalar * quat_scalar)))
 	return quat_vector / magnitude, quat_scalar / magnitude
 end
 
