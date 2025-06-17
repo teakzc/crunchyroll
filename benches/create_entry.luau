@@ -4,7 +4,7 @@ local create_bench = require(ReplicatedStorage.benches.create_bench)
 local rig_template = require(ReplicatedStorage.client.rig) :: any
 
 local SAMPLES = 500
-local ANIMATION_TEMPLATE = ReplicatedStorage.benches.assets.animation
+local ANIMATION_TEMPLATE = ReplicatedStorage.benches.assets.orange_justice
 
 type Rig = { __symbol: "RigSymbol" }
 type Animation = { __symbol: "AnimationSymbol" }
