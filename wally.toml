@@ -1,6 +1,6 @@
 [package]
 name = "ffrostfall/crunchyroll"
-version = "0.1.0"
+version = "0.1.1"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 exclude = [
@@ -25,4 +25,5 @@ exclude = [
 	"docs",
 	"why-is-it-named-crunchyroll.md",
 	"assets",
+	"globalTypes.d.luau",
 ]

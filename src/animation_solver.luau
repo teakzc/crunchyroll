@@ -33,8 +33,9 @@ local function quat_nlerp(
 	local quat_vector = vector_lerp(a_vector, b_vector, t)
 	local quat_scalar = number_lerp(a_scalar, b_scalar, t)
 
-	--stylua: ignore
-	local magnitude = math.sqrt((vector.dot(quat_vector, quat_vector) + (quat_scalar * quat_scalar)))
+	local magnitude =
+		math.sqrt((vector.dot(quat_vector, quat_vector) + (quat_scalar * quat_scalar)))
+
 	return quat_vector / magnitude, quat_scalar / magnitude
 end
 
@@ -45,11 +46,11 @@ local function solve_fade_time_influence(
 	stop_fade_time: number
 ): number
 	if real_time <= start_fade_time then
-		return math.min(1 - ((start_fade_time - real_time) / start_fade_time), 1)
+		return math.min(1, 1 - ((start_fade_time - real_time) / start_fade_time))
 	elseif real_time >= (animation_length + stop_fade_time) then
 		return math.min(
-			1 - ((real_time - (animation_length - stop_fade_time)) / stop_fade_time),
-			1
+			1,
+			1 - ((real_time - (animation_length - stop_fade_time)) / stop_fade_time)
 		)
 	else
 		return 1
@@ -123,18 +124,20 @@ local function animation_solver(
 			if left_pose and right_pose then
 				local alpha = left_pose.easing_function((real_time - (time_before :: number)) / ((time_after :: number) - (time_before :: number)))
 				local position = vector_lerp(left_pose.position, right_pose.position, alpha)
+				
 				local quat_vector, quat_scalar = quat_nlerp(
-					left_pose.quat_vector, left_pose.quat_scalar, 
-					right_pose.quat_vector, right_pose.quat_scalar, 
+					left_pose.quat_vector, left_pose.quat_scalar,
+					right_pose.quat_vector, right_pose.quat_scalar,
 					alpha
 				)
-
+				
 				node.position = vector_lerp(node.position, position, influence)
 				node.quat_vector, node.quat_scalar = quat_nlerp(
 					node.quat_vector, node.quat_scalar, 
 					quat_vector, quat_scalar, 
 					influence
 				)
+
 				node.priority = priority
 			elseif left_or_right then
 				node.position = vector_lerp(node.position, left_or_right.position, influence)
@@ -171,4 +174,8 @@ local function animation_solver(
 	end
 end
 
-return animation_solver
+return {
+	solve_fade_time_influence = solve_fade_time_influence,
+
+	solver = animation_solver,
+}

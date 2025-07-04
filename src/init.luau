@@ -106,5 +106,5 @@ return {
 	load_keyframe_sequence = animation_asset.load_keyframe_sequence,
 	create_rig = rig.create_rig,
 
-	solve_animation = animation_solver,
+	solve_animation = animation_solver.solver,
 }

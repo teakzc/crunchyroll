@@ -29,8 +29,33 @@ local function spawn_character()
 end
 
 local animation = crunchyroll.load_keyframe_sequence(keyframe_sequence, rig)
+local single_keyframe_animation =
+	crunchyroll.load_keyframe_sequence(ReplicatedStorage.assets.single_keyframe_animation, rig)
 local alpha = 0
 local character = spawn_character()
+local character2 = spawn_character()
+
+character2:PivotTo(CFrame.new(0, 10, 20))
+
+crunchyroll.solve_animation(rig, {
+	[single_keyframe_animation] = {
+		priority = 1,
+
+		start_fade_time = 0,
+		stop_fade_time = 0,
+		weight = 1,
+		alpha = 0,
+	},
+}, character2.HumanoidRootPart.CFrame)
+
+character2["Left Arm"].CFrame = rig.result_coordinate_frames["Left Arm"]
+character2["Right Arm"].CFrame = rig.result_coordinate_frames["Right Arm"]
+
+character2["Left Leg"].CFrame = rig.result_coordinate_frames["Left Leg"]
+character2["Right Leg"].CFrame = rig.result_coordinate_frames["Right Leg"]
+
+character2["Torso"].CFrame = rig.result_coordinate_frames["Torso"]
+character2["Head"].CFrame = rig.result_coordinate_frames["Head"]
 
 RunService.RenderStepped:Connect(function(delta_time)
 	-- loop the animation
