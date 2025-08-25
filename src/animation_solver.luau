@@ -61,8 +61,8 @@ local function animation_solver(
 	rig: create_rig.Identity,
 	tracks: {
 		[animation_asset.Identity]: AnimationTrack,
-	},
-	root: CFrame
+	} --,
+	--root: CFrame
 )
 	local limb_transforms = rig._limb_transforms
 	for _, limb in limb_transforms do
@@ -152,7 +152,7 @@ local function animation_solver(
 	end
 
 	local result_coordinate_frames: { [string]: CFrame } = rig.result_coordinate_frames
-	result_coordinate_frames["root"] = root
+	--result_coordinate_frames["root"] = root
 
 	for index, limb in rig._limbs do
 		local limb_transform = limb_transforms[index]
@@ -167,10 +167,10 @@ local function animation_solver(
 			quat_vector.x, quat_vector.y, quat_vector.z, quat_scalar
 		)
 
-		result_coordinate_frames[limb.name] = result_coordinate_frames[limb.depends_on]
-			* limb.c0
-			* transform
-			* limb.c1
+		result_coordinate_frames[limb.name] = transform -- this is for motor6ds --result_coordinate_frames[limb.depends_on]
+		--* limb.c0
+		--* transform
+		--* limb.c1
 	end
 end
 
