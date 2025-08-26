@@ -1,8 +1,9 @@
 [package]
-name = "ffrostfall/crunchyroll"
+name = "teakzc/crunchyroll"
 version = "0.1.1"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
+description = "version of crunchyroll so i can use motor6d :D"
 exclude = [
 	".github",
 	".lune",
